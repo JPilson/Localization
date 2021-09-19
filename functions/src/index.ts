@@ -97,6 +97,29 @@ app.post("/register/project", async (request, response) => {
   }
 });
 
+app.post("/update/project/:field", async (request, response)=> {
+    try {
+        const field = request.params['field'];
+        const body = request.body;
+        if (!(body['owner'] || body['ref'] || body['newValue'])) {
+            response.send({error: true, message: "Not Allowed", reason: "info incorrect"});
+            return;
+        }
+
+        const fauna = new FaunaDbHelper();
+        const data = JSON.parse(body['newValue']);
+
+        if (field === "specific") {
+            const result = await fauna.Update<ProjectLocal>(DB_COLLECTION.PROJECT, body['ref'], data as Array<ProjectLocal>, body['updatedFilled']);
+            response.status(200).send(result);
+            return;
+        }
+    } catch (e) {
+        response.send({error: true, message: "something went wrong", reason: `${e}`});
+        return;
+    }
+});
+
 app.post('/user/:uid', async (request, response)=>{
     try {
       const uid = request.params['uid'];
@@ -106,7 +129,7 @@ app.post('/user/:uid', async (request, response)=>{
       }
 
        const fauna = new FaunaDbHelper();
-       const result = await fauna.LoadByIndexBy<UserModelInterface>(DB_INDEX.USER_BY_UID, uid);
+       const result = await fauna.GetByIndex<UserModelInterface>(DB_INDEX.USER_BY_UID, uid);
         response.status(200).send(result);
         return;
     } catch (e) {
@@ -124,7 +147,7 @@ app.post('/user/:uid/projects', async (request, response)=>{
       }
 
        const fauna = new FaunaDbHelper();
-       const result = await fauna.GetByIndex<ProjectModelInterface>(DB_INDEX.PROJECT_OWNER_UID, uid);
+       const result = await fauna.LoadByIndexBy<ProjectModelInterface>(DB_INDEX.PROJECT_OWNER_UID, uid);
         response.status(200).send(result);
         return;
     } catch (e) {

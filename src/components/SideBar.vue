@@ -28,28 +28,62 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+      <v-spacer/>
+
+      <template v-slot:append>
+        <v-col  class="d-flex flex-column align-center">
+          <vs-switch success :dark="true" v-model="themeSelector" :style="`background: ${colors.background};height:40px; width:210px`" >
+            <template #circle>
+              <SIcon icon="contrast" />
+            </template>
+            <template #off>
+              <TextView text="Dark Theme" :color="colors.primaryText" />
+            </template>
+            <template #on>
+              <TextView text="Light Theme" :color="colors.primaryText" />
+            </template>
+          </vs-switch>
+
+          <vs-button block style="background: #ff2f79; height: 50px" class="mt-4" shadow @click="sinOut" >
+            <TextView text="Sign Out" bold size="14" color="white"/>
+          </vs-button>
+        </v-col>
+
+      </template>
     </v-navigation-drawer>
 
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import {Component} from "vue-property-decorator";
-import {ColorType} from "@/values/Colors";
+import {Component, Watch} from "vue-property-decorator";
+import {AppTheme, ColorType} from "@/values/Colors";
 import {LanguageType} from "@/values/Strings";
 import TextView from "@/utils/UI/TextView/TextView.vue";
 import SIcon, {iconNames} from "@/utils/UI/Sicon/SIcon.vue";
+import BIcon from "@/utils/UI/BIcon/BIcon.vue";
+import store from "@/store";
+import firebase from "firebase/compat";
 
 @Component({
-  components: {SIcon, TextView},
+  components: {BIcon, SIcon, TextView},
 })
 export default class SideBar extends Vue {
+  themeSelector = true
 
   menuItem = [
     {icon:"dashboard" as iconNames,label:"Project"},
     {icon:"settings" as iconNames,label:"History"},
 
   ]
+
+  @Watch('themeSelector',{immediate:true,deep:true})
+  onThemeSelected(active:boolean):void{
+      this.$store.dispatch("changeAppTheme",active?AppTheme.dark:AppTheme.light ).then()
+  }
+  sinOut():void {
+    firebase.auth().signOut()
+  }
 
   get colors(): ColorType {
     return this.$store.getters.colors;

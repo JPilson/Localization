@@ -4,24 +4,13 @@
     <TextView text="Your Projects" :color="colors.primaryText" bold size="28" />
 
     <v-layout row-wrap class="my-10" jus>
-      <vs-button style="background: transparent; padding: 0!important;" :shadow="false"  >
-        <LinearLayout rounded-corners="15" background-tint="rgba(224,255,205,0.46)">
-          <v-flex class="px-5 py-10" style="display: grid; place-items: center">
-            <LinearLayout class="pa-2 my-2" :background-tint="`rgba(0,0,0,0.13)`" rounded-corners="4">
-              <SIcon icon="translation" :color="`rgba(224,255,205,0.80)`"/>
-            </LinearLayout>
-            <TextView text="Project Title" bold size="18" :color="colors.primaryText"/>
-            <TextView :text="`localized for\n3 Regions`" size="12" :color="colors.primaryText"/>
-          </v-flex>
-          <LinearLayout style="display: grid; place-items: center" :background-tint="`rgba(0,0,0,0.13)`"
-                        radius-bottom-left="15" class="py-3" radius-bottom-right="15">
-            <TextView text="Invite contributors" :color="colors.primaryText" size="12"/>
-          </LinearLayout>
-        </LinearLayout>
-      </vs-button>
+      <ProjectCard v-for="(project,index) in projects " :key ="`project_${index}`" :project="project" />
       <ProjectRegister/>
 
     </v-layout>
+    <div v-if="isGettingProjects" style="max-width: 30px; max-height: 30px">
+      <LoadingBox/>
+    </div>
   </v-col>
 </template>
 
@@ -37,13 +26,53 @@ import LocalTable from "@/components/LocalTable.vue";
 import SIcon from "@/utils/UI/Sicon/SIcon.vue";
 import {languageList, LanguageModelInterface} from "@/models/Language";
 import ProjectRegister from "@/components/ProjectRegister.vue";
+import APiHelper from "@/api/APiHelper";
+import {UserModelInterface} from "@/models/User";
+import ProjectCard from "@/components/ProjectCard.vue";
+import {ProjectModelInterface} from "@/models/Project";
+import firebase from "firebase/compat";
+import LoadingBox from "@/components/LoadingBox.vue";
 
 @Component({
-  components: {ProjectRegister, SIcon, LocalTable, LinearLayout, BIcon, TextView},
+  components: {LoadingBox, ProjectCard, ProjectRegister, SIcon, LocalTable, LinearLayout, BIcon, TextView},
 })
 export default class Home extends Vue {
 
+  isGettingProjects =  false
+  async getUsersProjects(): Promise<void>{
+    try {
 
+      const uid = this.user.uid ?? firebase.auth().currentUser?.uid
+      const api = new APiHelper()
+
+      const result = await api.getProjects(uid);
+      // console.log(result)
+      if (result.error) {
+        return
+      }
+
+      await this.$store.dispatch("updateProjectList", result.data)
+    }  finally {
+      this.isGettingProjects = false
+    }
+
+  }
+
+  mounted():void {
+
+    this.isGettingProjects = this.projects.length === 0
+   setTimeout(()=>{
+     if(this.projects.length === 0)
+       this.getUsersProjects()
+   },2000)
+  }
+  
+  get projects(): Array<ProjectModelInterface> {
+    return  this.$store.getters.projects
+  }
+  get user(): UserModelInterface {
+    return this.$store.getters.user
+  }
 
   get colors(): ColorType {
     return this.$store.getters.colors;

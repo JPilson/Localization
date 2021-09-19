@@ -1,6 +1,6 @@
 <template>
   <div>
-    <vs-button :style="`background: ${colors.card}`"  :shadow="false" @click="projectRegisterDialogActivator = !projectRegisterDialogActivator" >
+    <vs-button :style="`background: ${colors.card}`"  shadow @click="projectRegisterDialogActivator = !projectRegisterDialogActivator" >
       <LinearLayout rounded-corners="15"  class="mx-2" >
         <v-flex class="px-5 py-10" style="display: grid; place-items: center">
           <LinearLayout class="pa-2 my-2" :background-tint="colors.background" rounded-corners="4">
@@ -31,7 +31,7 @@
               </vs-option>
             </vs-select>
           </v-flex>
-          <vs-button block class="my-5" :style="`background: ${selectedColor}`" @click="registerProject">
+          <vs-button block class="my-5" :style="`background:${selectedColor}99`" @click="registerProject">
             <TextView text="create project" bold />
           </vs-button>
         </v-flex>

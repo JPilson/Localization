@@ -41,7 +41,7 @@ export default  {
 
         homePlayBtn:"#bee4ff",
         homePlayBtnText:"#0095ff",
-        keyColumn:""
+        keyColumn:"rgb(229,229,229)"
 
     } as ColorType,
     dark:{

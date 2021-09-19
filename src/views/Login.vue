@@ -107,6 +107,42 @@ export default class Login extends Vue {
     try {
       this.loginOptions[1].isLoading = true
       this.loginOptions[0].disabled = true
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase
+          .auth()
+          .signInWithPopup(provider)
+          .then((result) => {
+            // console.log("Login ",result)
+            /** @type {firebase.auth.OAuthCredential} */
+            // const credential = result.credential;
+            if(result.additionalUserInfo?.isNewUser) {
+
+              //  TODO: register user
+
+            }else{
+              //  TODO: Get users info
+            }
+
+            // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+            // var token = credential.accessToken;
+
+            // The signed-in user info.
+
+
+            // ...
+          }).catch((error) => {
+        //    TODO Notify user that something happend
+        // Handle Errors here.
+        // var errorCode = error.code;
+        // var errorMessage = error.message;
+        // The email of the user's account used.
+        // var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        // var credential = error.credential;
+        // ...
+        console.log(error)
+      });
+
     }catch (e) {
     //
     }finally {
@@ -127,7 +163,7 @@ export default class Login extends Vue {
         .auth()
         .signInWithPopup(provider)
         .then((result) => {
-          console.log("Login ",result)
+          // console.log("Login ",result)
           /** @type {firebase.auth.OAuthCredential} */
           // const credential = result.credential;
           if(result.additionalUserInfo?.isNewUser) {
@@ -189,10 +225,7 @@ export default class Login extends Vue {
     }
   }
 
-  beforemount(): void {
-    //
 
-  }
   @Watch('userType',{immediate:true,deep:true})
   onUserTypeSelected(userTypeIndex:number):void {
     this.user.type = this.userTypeList[userTypeIndex-1];

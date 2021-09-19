@@ -32,7 +32,9 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx",
+    "node_modules/@types/file-saver/index.d.ts",
+    "node_modules/@types/file-saver/index.d.ts"
   ],
   "exclude": [
     "node_modules"

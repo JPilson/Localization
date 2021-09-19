@@ -3,7 +3,7 @@ import Vuex, {ActionContext} from 'vuex'
 import Colors, {AppTheme, ColorType} from "@/values/Colors";
 import Strings, {LanguageType} from "@/values/Strings";
 import {UserModelInterface} from "@/models/User";
-import {ProjectLocal, ProjectModelInterface} from "@/models/Project";
+import {ProjectModelInterface} from "@/models/Project";
 
 
 const theme:AppTheme = AppTheme.dark

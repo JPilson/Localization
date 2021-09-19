@@ -2,18 +2,7 @@
   <v-app :style="{background: colors.background} "  :dark="isDark" >
 
     <div v-if="isSessionActive">
-      <v-app-bar app :color="colors.background"  flat>
-        <v-flex d-flex>
-          <TextView text="Projects  " bold/>
-          <box-icon type="regular" class="mx-2" name="chevron-right" :color="colors.primaryText"/>
-          <TextView text="EncDaJob" size="12"/>
-        </v-flex>
-        <v-spacer />
-        <vs-avatar  size="30" badge badge-color="success" >
-          <img :src="user.photoURL" alt="">
-        </vs-avatar>
-      </v-app-bar>
-
+      <ToolBar/>
       <SideBar/>
     </div>
 
@@ -28,7 +17,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Utils from "@/utils/Utils";
-import {Component} from "vue-property-decorator";
+import {Component, Watch} from "vue-property-decorator";
 import {ColorType} from "@/values/Colors";
 import TextView from "@/utils/UI/TextView/TextView.vue";
 import SideBar from "@/components/SideBar.vue";
@@ -37,15 +26,20 @@ import firebase from "firebase/compat";
 import {UserModelInterface} from "@/models/User";
 import APiHelper from "@/api/APiHelper";
 import {errors} from "faunadb";
+import SIcon from "@/utils/UI/Sicon/SIcon.vue";
+import ToolBar from "@/components/ToolBar.vue";
 
 @Component({
   components: {
+    ToolBar,
+    SIcon,
     SideBar,
     TextView
 
   },
 })
 export default class App extends Vue {
+  
   get colors ():ColorType {
     return this.$store.getters.colors
   }
@@ -58,6 +52,11 @@ export default class App extends Vue {
   }
   get user():UserModelInterface {
     return  this.$store.getters.user
+  }
+
+  @Watch('isDark',{immediate:true,deep:true})
+  onThemeChanged(isDark: boolean):void {
+    // console.log("Dark is ", isDark)
   }
   async getUserInfoFromDB(uid:string,onSuccess:(user:UserModelInterface | null)=>void, onError:(error: any)=> void){
     
@@ -77,6 +76,14 @@ export default class App extends Vue {
 
   }
 
+
+  created():void {
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    Vue.prototype.$vs = this.$vs;
+  }
+
   beforeMount():void{
     // firebase.auth().signOut();
 
@@ -86,10 +93,13 @@ export default class App extends Vue {
     firebase.auth().onAuthStateChanged((user)=>{
 
       if(!user){
+        this.$store.dispatch("updateSession",{user:null})
+        this.$store.dispatch("updateNewUserState",false)
         // console.log("User out")
       //  TODO: don't let user be in some other page beside Login
         this.$router.replace("/")
-        this.$store.dispatch("updateNewUserState",false)
+        this.$store.dispatch("updateProjectList",[])
+
         return
       }
       this.getUserInfoFromDB(user.uid,(user)=>{
@@ -103,7 +113,7 @@ export default class App extends Vue {
 
          return
        }
-       console.log("user is valid")
+
         this.$store.dispatch("updateNewUserState",false)
 
         if(this.$route.name == "Login")
@@ -124,9 +134,9 @@ export default class App extends Vue {
 
     })
 
-    // const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
-    // Utils.onThemeChange(systemTheme)
-    // systemTheme.addEventListener("change",(theme)=>Utils.onThemeChange(theme))
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+    Utils.onThemeChange(systemTheme)
+    systemTheme.addEventListener("change",(theme)=>Utils.onThemeChange(theme))
   }
 
 

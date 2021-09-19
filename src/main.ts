@@ -10,14 +10,15 @@ import vuesaxOption from "@/plugins/vuesax";
 import firebase from "firebase/compat";
 
 
+
 const firebaseConfig = {
-  apiKey: "AIzaSyA3oWcxnVSk6Yv-zpeR5PiKrxsSn3mEnYs",
-  authDomain: "localization-2dd83.firebaseapp.com",
-  projectId: "localization-2dd83",
-  storageBucket: "localization-2dd83.appspot.com",
-  messagingSenderId: "1079500212038",
-  appId: "1:1079500212038:web:72134bb5e0fb77fba8c747",
-  measurementId: "G-VPQRCH94HX"
+  apiKey: process.env.VUE_APP_API_KEY,
+  authDomain: process.env.VUE_APP_AUTH_DOMAIN,
+  projectId: process.env.VUE_APP_PROJECT_ID,
+  storageBucket: process.env.VUE_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.VUE_APP_MESSAGING_SENDER_ID,
+  appId: process.env.VUE_APP_APP_ID,
+  measurementId: process.env.VUE_APP_MEASUREMENT_ID
 };
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

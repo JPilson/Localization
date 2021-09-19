@@ -1,8 +1,12 @@
 import moment from "moment";
 import store from "../store/index"
 import {AppTheme} from "@/values/Colors";
+import {saveAs} from 'file-saver';
+
+import {Key, ProjectLocal} from "@/models/Project";
+import JSZip from "jszip";
 import NumberFormatOptions = Intl.NumberFormatOptions;
-import {TableItemModel} from "@/components/LocalTable.vue";
+
 
 moment.locale('pt-br');
 
@@ -97,33 +101,69 @@ export default class Utils {
 
     }
 
-    static  async convertToYAMLProperties (keysList:TableItemModel,local:TableItemModel):Promise<void>{
+    static  async convertToYAMLProperties (keysList:ProjectLocal,local:ProjectLocal):Promise<{ name:string,data:string }>{
         let code = ""
-        await local.keys.forEach((key,index) =>{
+        await local.keys.forEach((key:Key,index:number) =>{
             code += `${keysList.keys[index].value}: ${key.value} \n`
         })
-       await this.convertIntoFile(code,"eng",FileType.yaml)
+        return {
+            name:`${local.local.code}${FileType.yaml}`,
+            data:code
+        }
+       // await this.convertIntoFile(code,"eng",FileType.yaml)
     }
-    static  jsonFormat (keysList:TableItemModel,local:TableItemModel):void {
-        let code = "";
-        local.keys.forEach((key,index) =>{
-            // Please let the space where it is
-            code += '    "'+keysList.keys[index].value+'":'+ '"'+key.value+'"\n'
-
+    static  async convertToXMLProperties (keysList:ProjectLocal,local:ProjectLocal):Promise<{ name:string,data:string }>{
+        let code = ""
+        await local.keys.forEach((key:Key,index:number) =>{
+            code += `${keysList.keys[index].value}: ${key.value} \n`
         })
-        const data = "{\n eng:{\n"+code+"}\n}"
-        console.log(data)
+        return {
+            name:`${local.local.code}${FileType.yaml}`,
+            data:code
+        }
+        // await this.convertIntoFile(code,"eng",FileType.yaml)
     }
-    static  async convertToAndroidStrings (keysList:TableItemModel,local:TableItemModel):Promise<string> {
+    static async jsonFormat (keysList:ProjectLocal,local:ProjectLocal,isLast = false,isParent = false):Promise<string> {
+            let code = "";
+            const keysLength = local.keys.length-1
+            local.keys.forEach((key:Key,index:number) =>{
+                // Please let the space where it is
+                code += '   "'+keysList.keys[index].value+'":'+ '"'+key.value+'"'
+                code += (index === keysLength)? "\n":",\n" // adding colon for the next key case its not the last
+
+            })
+        return  "\n \"" + local.local.code + "\":{\n" + code + "}"
+
+    }
+    static  async convertToAndroidStrings (keysList:ProjectLocal,local:ProjectLocal):Promise<{ name:string,data:string }> {
         let code = "";
-         local.keys.forEach((key,index) =>{
+        local.keys.forEach((key:Key,index:number) =>{
             // Please let the space where it is
             code += `       <string name = "${keysList.keys[index].value}">`+'"'+key.value + '"'+`</string>`+"\n"
         })
         const data =  "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
             "    <resources>\n"+code+"\n</resources>"
 
-        return  data
+        return {
+            name:`${local.local.code}${FileType.android}`,
+            data:data
+        }
+    }
+    static async convertToZip(files:Array<{ name:string,data:string }>, zipName:string):Promise<void>{
+        try {
+            if (files) {
+                const zip = new JSZip()
+                files.forEach((file) => zip.file(file.name, file.data))
+                // const img:JSZip | null = zip.folder("images");
+                // img?.file("smile.gif", "imgData", {base64: true});
+                const content = await zip.generateAsync({type: "blob"})
+                await saveAs(content, `${zipName}.zip`)
+                return
+            }
+        } catch (e) {
+            throw new Error(e)
+        }
+
     }
 
     static async convertIntoFile (data:string,filename:string,format:FileType):Promise<void>{
@@ -150,6 +190,7 @@ export default class Utils {
 
         }
     }
+
 
 
 

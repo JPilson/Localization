@@ -81,7 +81,7 @@ export default class FaunaDbHelper {
         }
     }
 
-    async LoadByIndexBy<T>(index:DB_INDEX, ref:string, limit = 25):Promise<T>{
+    async LoadByIndexBy<T>(index:DB_INDEX, reference:string, limit = 25):Promise<T>{
         // Pagination options .. Size, after, before
         try {
             const option: Record<string, string | number> = {};
@@ -91,7 +91,7 @@ export default class FaunaDbHelper {
             const client = this.connect();
             const FQL = this.FQL;
             return await client.query(FQL.Map(
-                FQL.Paginate(Documents(Match(Index(index), ref)), option),
+                FQL.Paginate(Match(Index(index), reference), option),
                 Lambda((ref: string | number | boolean) => Select(['data'], FQL.Get(ref)))));
         } catch (e) {
             throw Error(e.description);
@@ -117,6 +117,19 @@ export default class FaunaDbHelper {
         } catch (e) {
             throw Error(e.description);
         }
+    }
+
+    async Update<T>(collection: DB_COLLECTION, reference:string, newData:string |number|boolean | Array<never> | Record<never, never>, updateFilled: string):Promise<T> {
+        try {
+            const client = this.connect();
+            const FQL = this.FQL;
+            return await client.query(FQL.Update(FQL.Ref(FQL.Collection(collection), reference),
+                {data: {[updateFilled]: newData}})
+            );
+        } catch (e) {
+            throw Error(e.description);
+        }
+
     }
 
 
