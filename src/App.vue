@@ -97,7 +97,9 @@ export default class App extends Vue {
         this.$store.dispatch("updateNewUserState",false)
         // console.log("User out")
       //  TODO: don't let user be in some other page beside Login
-        this.$router.replace("/")
+        if(this.$route.name !== "Login"){
+          this.$router.replace("/")
+        }
         this.$store.dispatch("updateProjectList",[])
 
         return

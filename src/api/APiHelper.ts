@@ -7,7 +7,7 @@ import {ProjectModelInterface} from "@/models/Project";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const axios = require('axios').default;
 
-const END_POINT = process.env["VUE_APP_END_POINT "]
+const END_POINT = process.env["VUE_APP_END_POINT "]??"http://localhost:5000/"
 enum endpoint {
 
 }
