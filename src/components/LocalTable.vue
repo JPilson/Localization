@@ -325,7 +325,7 @@ export default class LocalTable extends Vue {
     }
   }
 
-  async exportToFile(option: ExportOption,index:number): void {
+  async exportToFile(option: ExportOption,index:number): Promise<void> {
     try { // Utils.convertToYAMLProperties(this.items[0],this.items[1])
       // Utils.convertToAndroidStrings(this.items[0],this.items[1])
       // Utils.jsonFormat(this.items[0],this.items[1])
@@ -383,7 +383,7 @@ export default class LocalTable extends Vue {
     }
     return files
   }
-  async prepareForJSON(): Promise<{ name: string, data: string }> {
+  async prepareForJSON(): Promise<Array<{ name: string, data: string }>> {
     const total = this.items.length
     let index = 1
     let files = ""

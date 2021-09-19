@@ -32,16 +32,16 @@ export default class BIcon extends Vue {
     return this.$store.getters.colors.primaryText
   }
 
-  @PropSync('type',{type:String,required:false, default:"regular"}) synced_type;
+  @PropSync('type',{type:String,required:false, default:"regular"}) synced_type!:"regular"| "logos"|"solid";
   @PropSync('name',{required:true}) synced_name!:string;
 
-  @PropSync("color",{default:"white"}) synced_color;
+  @PropSync("color",{default:"white"}) synced_color!:string;
   @PropSync("size",{default:"sm"}) synced_size!:"xs"|"sm"|"md"|"lg"|"cssSize"
   @PropSync("rotate") synced_rotate!:"90"|"180"|"270";
   @PropSync("flip") synced_flip!:"horizontal|vertical"
   @PropSync("border") borderSynced!:"square"|"circle" ;
   @PropSync("animation") synced_animation!:"spin"|"tada" ;
-  @PropSync("pull") synced_pull: "left"|"right"
+  @PropSync("pull") synced_pull!: "left"|"right"
 }
 </script>
 
