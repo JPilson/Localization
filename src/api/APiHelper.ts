@@ -46,8 +46,7 @@ export default class APiHelper {
         // return await this._request<UserModelInterface>(END_POINT + `user/${uid}`)
         return FaunaDbHelper.instance.GetByIndex(DB_INDEX.USER_BY_UID, uid)
             .catch(reason => {
-
-                return null
+                return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
             }).then(result => {
                 return (result as FaunaData).data as unknown as UserModelInterface
             })

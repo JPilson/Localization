@@ -29,7 +29,6 @@ export default new Vuex.Store({
     updateSession(state,payload: { user:UserModelInterface | null }){
       // console.log(`state is ${payload}`)
       state.isSessionActive = !!payload.user;
-
       state.userInfo = payload.user;
     },
     updateNewUserState(state,payload){

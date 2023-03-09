@@ -27,6 +27,7 @@ import {UserModelInterface} from "@/models/User";
 import APiHelper from "@/api/APiHelper";
 import SIcon from "@/utils/UI/Sicon/SIcon.vue";
 import ToolBar from "@/components/ToolBar.vue";
+import User = firebase.User;
 
 @Component({
   components: {
@@ -55,32 +56,56 @@ export default class App extends Vue {
     return this.$store.getters.user
   }
 
-  get newUSer(): boolean {
-    return this.$store.getters.isNewUser
-  }
-
   @Watch('isDark', {immediate: true, deep: true})
   onThemeChanged(isDark: boolean): void {
     // console.log("Dark is ", isDark)
   }
 
-  async getUserInfoFromDB(uid: string, onSuccess: (user: UserModelInterface | null) => void, onError: (error: any) => void): Promise<void> {
-    const api = new APiHelper();
-    const result = await api.getUserByUId(uid);
-    if (!result) {
-      onError("Failed")
-      return
-    }
-    onSuccess(result)
-    // onSuccess(result);
-  }
-
-
   created(): void {
-
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     Vue.prototype.$vs = this.$vs;
+  }
+  async getUserInfoFromDB(uid: string, onSuccess: (user: UserModelInterface | null) => void, onError: (error: any) => void): Promise<void> {
+    try {
+      const api =  new APiHelper()
+      const result = await api.getUserByUId(uid);
+
+      if (!result) {
+        onError(result)
+        return
+      }
+      onSuccess(result)
+    } catch (e) {
+      alert("oops")
+    }
+    // onSuccess(result);
+  }
+  startSession(firebaseUser:User):void {
+    this.getUserInfoFromDB(firebaseUser.uid, (user) => {
+      if (!user) {
+        this.$store.dispatch("updateSession", {user: null})
+        this.$store.dispatch("updateNewUserState", false)
+        if (this.$route.name !== "Login") {
+          this.$router.replace("/")
+        }
+        return
+      }
+      this.$store.dispatch("updateNewUserState", false)
+
+      if (this.$route.name == "Login")
+        this.$router.replace("/home").then(() => {
+          this.$store.dispatch("updateSession", {user: user})
+        })
+      else
+        this.$store.dispatch("updateSession", {user: user});
+
+
+    }, (error) => {
+      console.log(`Something went wrong try again `, error)
+      this.$store.dispatch("updateNewUserState", true)
+      // firebase.auth().signOut()
+    })
   }
 
   beforeMount(): void {
@@ -100,31 +125,8 @@ export default class App extends Vue {
 
         return
       }
-      this.getUserInfoFromDB(user.uid, (user) => {
+      this.startSession(user)
 
-        if (!user) {
-          this.$store.dispatch("updateSession", {user: null})
-          this.$store.dispatch("updateNewUserState", false)
-          if (this.$route.name !== "Login") {
-            this.$router.replace("/")
-          }
-          return
-        }
-        this.$store.dispatch("updateNewUserState", false)
-
-        if (this.$route.name == "Login")
-          this.$router.replace("/home").then(() => {
-            this.$store.dispatch("updateSession", {user: user})
-          })
-        else
-          this.$store.dispatch("updateSession", {user: user});
-
-
-      }, (error) => {
-        console.log(`Something went wrong try again `, error)
-        this.$store.dispatch("updateNewUserState", true)
-        // firebase.auth().signOut()
-      })
     })
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
     Utils.onThemeChange(systemTheme)

@@ -17,7 +17,8 @@
                   <TextView text="Login options" bold size="30" :color="colors.primaryText"/>
                 </div>
                 <LinearLayout style="" horizontal-orientation class="mt-2 pa-5">
-                  <vs-button :loading="option.isLoading" :active-disabled="option.disabled" :color="colors.background" v-for="(option,index) in loginOptions" :key="`btn_${index}`" block @click="option.callBack"
+                  <vs-button :loading="option.isLoading" :active-disabled="option.disabled" :color="colors.background"
+                             v-for="(option,index) in loginOptions" :key="`btn_${index}`" block @click="option.callBack"
                              style="height: 150px; width: 180px; border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.05) ">
                     <SIcon :icon="option.icon" :color="colors.primaryText" size="40"/>
                   </vs-button>
@@ -35,15 +36,19 @@
                   <TextView :text="user.displayName" bold size="18" :color="colors.primaryText"/>
                   <TextView :text="user.email" size="12" :color="colors.secondaryText"/>
                 </v-flex>
-                <vs-input :loading="isRegisteringUser" :state="theme" style="color:black" v-model="user.displayName" label="Your Name" placeholder="Name" class="my-2 mt-5"/>
-                <vs-select :loading="isRegisteringUser" :filter="true" collapse-chips  :state="theme" placeholder="Select your new Local" v-model="userType" class="my-2">
-                  <vs-option   :state="theme" v-for="(type,index) in userTypeList" :key="`index_${index}`" :label="type.label" :value="index+1">
-<!--                    <TextView :text="type.label" bold/>-->
-                    {{type.label}}
+                <vs-input :loading="isRegisteringUser" :state="theme" style="color:black" v-model="user.displayName"
+                          label="Your Name" placeholder="Name" class="my-2 mt-5"/>
+                <vs-select :loading="isRegisteringUser" :filter="true" collapse-chips :state="theme"
+                           placeholder="Select your new Local" v-model="userType" class="my-2">
+                  <vs-option :state="theme" v-for="(type,index) in userTypeList" :key="`index_${index}`"
+                             :label="type.label" :value="index+1">
+                    <!--                    <TextView :text="type.label" bold/>-->
+                    {{ type.label }}
                   </vs-option>
 
                 </vs-select>
-                <vs-input :loading="isRegisteringUser" :state="theme" style="color:black" v-model="user.organizationName" placeholder="Company Name (Optional)"/>
+                <vs-input :loading="isRegisteringUser" :state="theme" style="color:black"
+                          v-model="user.organizationName" placeholder="Company Name (Optional)"/>
 
                 <vs-button block class="my-2" :loading="isRegisteringUser" @click="registerUserToFauna()">
                   <TextView text="done"/>
@@ -79,28 +84,31 @@ import APiHelper from "@/api/APiHelper";
 export default class Login extends Vue {
   screenSteps = 1
   isRegisteringUser = false
-  userTypeList:Array<UserTypeInfo> = [{type:"dev",label:"I'm a developer"},{type:"fr_dev",label:"I'm a Freelancer Dev"},{type:"no_dev",label:"I'm not Dev"}]
-  userType  = 1
+  userTypeList: Array<UserTypeInfo> = [{type: "dev", label: "I'm a developer"}, {
+    type: "fr_dev",
+    label: "I'm a Freelancer Dev"
+  }, {type: "no_dev", label: "I'm not Dev"}]
+  userType = 1
   user: UserModelInterface = {
     displayName: "",
-    organizationName:"",
-    email:"",
-    phoneNumber:"",
-    photoURL:"",
-    providerId:"",
-    uid:"",
-    type:{type:"dev",label:"I'm a developer"},
-    userTypeCode:"dev"
+    organizationName: "",
+    email: "",
+    phoneNumber: "",
+    photoURL: "",
+    providerId: "",
+    uid: "",
+    type: {type: "dev", label: "I'm a developer"},
+    userTypeCode: "dev"
 
   }
 
-  loginOptions =  [
-    {icon:"github",disabled:false,isLoading:false,callBack:()=>this.loginWithGithub()},
-    {icon:"googleColored",disabled:false,isLoading:false,callBack:()=>this.loginWithGoogle()}
+  loginOptions = [
+    {icon: "github", disabled: false, isLoading: false, callBack: () => this.loginWithGithub()},
+    {icon: "googleColored", disabled: false, isLoading: false, callBack: () => this.loginWithGoogle()}
 
   ]
 
-  loginWithGoogle():void {
+  loginWithGoogle(): void {
     try {
       this.loginOptions[1].isLoading = true
       this.loginOptions[0].disabled = true
@@ -112,11 +120,11 @@ export default class Login extends Vue {
             // console.log("Login ",result)
             /** @type {firebase.auth.OAuthCredential} */
             // const credential = result.credential;
-            if(result.additionalUserInfo?.isNewUser) {
+            if (result.additionalUserInfo?.isNewUser) {
 
               //  TODO: register user
 
-            }else{
+            } else {
               //  TODO: Get users info
             }
 
@@ -140,17 +148,18 @@ export default class Login extends Vue {
         console.log(error)
       });
 
-    }catch (e) {
+    } catch (e) {
       this.loginOptions[1].isLoading = false
       this.loginOptions[0].disabled = false
-    //
-    }finally {
-      setTimeout(()=>{
+      //
+    } finally {
+      setTimeout(() => {
         this.loginOptions[1].isLoading = false
         this.loginOptions[0].disabled = false
-      },5000)
+      }, 5000)
     }
   }
+
   loginWithGithub(): void {
     this.loginOptions[0].isLoading = true
     this.loginOptions[1].disabled = true
@@ -164,10 +173,10 @@ export default class Login extends Vue {
           // console.log("Login ",result)
           /** @type {firebase.auth.OAuthCredential} */
           // const credential = result.credential;
-          if(result.additionalUserInfo?.isNewUser) {
-          //  TODO: register user
-          }else{
-          //  TODO: Get users info
+          if (result.additionalUserInfo?.isNewUser) {
+            //  TODO: register user
+          } else {
+            //  TODO: Get users info
           }
           // This gives you a GitHub Access Token. You can use it to access the GitHub API.
           // var token = credential.accessToken;
@@ -191,59 +200,81 @@ export default class Login extends Vue {
 
   }
 
-  registerUserToFauna():void{
+  registerUserToFauna(): void {
     try {
-      if(this.user.displayName){
-        if (this.user.displayName.length < 2) {
-          alert("Your name is too short")
-          return
-        }
-
-        this.isRegisteringUser = true
-
-        const api = new APiHelper();
-        api.registerUser(this.user).then((value) => {
-          console.log(`User registration`, value)
-        })
+      if (!this.user.displayName) {
+        alert("Your name is too short")
         return;
       }
-      alert("Your name is too short")
+      if (this.user.displayName.length < 2) {
+        alert("Your name is too short")
+        return
+      }
+      this.$store.dispatch("updateSession", true)
+
+
+      this.isRegisteringUser = true
+
+      const api = new APiHelper();
+      api.registerUser(this.user).then((user) => {
+        if (!user) {
+          this.$store.dispatch("updateSession", {user: null})
+          this.$store.dispatch("updateNewUserState", false)
+          if (this.$route.name !== "Login") {
+            this.$router.replace("/")
+          }
+          return
+        }
+        this.$store.dispatch("updateNewUserState", false)
+
+        if (this.$route.name == "Login")
+          this.$router.replace("/home").then(() => {
+            this.$store.dispatch("updateSession", {user: user})
+          })
+        else
+          this.$store.dispatch("updateSession", {user: user});
+      })
+
     } catch (e) {
-    //  TODO: catch
-      console.log(e)
+      alert("Something Went Wrong")
     } finally {
-     setTimeout(()=> this.isRegisteringUser = false,2000)
+      setTimeout(() => this.isRegisteringUser = false, 2000)
 
     }
   }
 
 
-  @Watch('userType',{immediate:true,deep:true})
-  onUserTypeSelected(userTypeIndex:number):void {
-    this.user.type = this.userTypeList[userTypeIndex-1];
-    this.user.userTypeCode = this.userTypeList[userTypeIndex-1].type
+  @Watch('userType', {immediate: true, deep: true})
+  onUserTypeSelected(userTypeIndex: number): void {
+    this.user.type = this.userTypeList[userTypeIndex - 1];
+    this.user.userTypeCode = this.userTypeList[userTypeIndex - 1].type
     // console.log(userTypeIndex)
   }
-  @Watch('isNewUser',{ immediate: true, deep: true })
-  onNewUserChecked(isNew: boolean):void {
-    if(isNew){
-      const  fbUser = firebase.auth().currentUser;
-     if(fbUser){
-       this.user = {
-         displayName:fbUser.displayName,
-         organizationName:"",
-         email:fbUser.email,
-         phoneNumber:fbUser.phoneNumber,
-         photoURL:fbUser.photoURL,
-         providerId:fbUser.providerId,
-         uid:fbUser.uid,
-         type : this.userTypeList[this.userType - 1],
-          userTypeCode : this.userTypeList[this.userType-1].type
 
-       }
-       this.screenSteps = 2
-     }
+  @Watch('isNewUser', {immediate: true, deep: true})
+  onNewUserChecked(isNew: boolean): void {
+    if (isNew) {
+      const fbUser = firebase.auth().currentUser;
+      if (fbUser) {
+        this.user = {
+          displayName: fbUser.displayName,
+          organizationName: "",
+          email: fbUser.email,
+          phoneNumber: fbUser.phoneNumber,
+          photoURL: fbUser.photoURL,
+          providerId: fbUser.providerId,
+          uid: fbUser.uid,
+          type: this.userTypeList[this.userType - 1],
+          userTypeCode: this.userTypeList[this.userType - 1].type
+
+        }
+        this.screenSteps = 2
+      }
     }
+  }
+
+  get isSessionActive(): boolean {
+    return this.$store.getters.session
   }
 
   get colors(): ColorType {
@@ -266,15 +297,14 @@ export default class Login extends Vue {
   get illustrationMaxSize(): number {
     return 600
   }
-  get isNewUser():boolean {
-    return  this.$store.getters.isNewUser
+
+  get isNewUser(): boolean {
+    return this.$store.getters.isNewUser
   }
 
 
-
-
-  get theme():AppTheme {
-    return  this.$store.getters.theme
+  get theme(): AppTheme {
+    return this.$store.getters.theme
   }
 
 }
