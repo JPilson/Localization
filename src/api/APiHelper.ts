@@ -7,7 +7,7 @@ import {ProjectModelInterface} from "@/models/Project";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const axios = require('axios').default;
 
-const END_POINT = process.env["VUE_APP_END_POINT "]??"http://localhost:5000/"
+const END_POINT = process.env["VUE_APP_END_POINT"]
 enum endpoint {
 
 }
@@ -24,7 +24,7 @@ export default class APiHelper {
         return await this._request<UserModelInterface>(END_POINT + 'register/user', body)
     }
     async  registerProject(project:ProjectModelInterface): Promise<{ data?: Array<ProjectModelInterface>; error: boolean; message?: string,reason?: string }> {
-        const body = new URLSearchParams(project as Record<string, any>)
+        const body = new URLSearchParams(project as unknown as Record<string, never>)
         body.set("contributors",JSON.stringify(project.contributors));
         body.set("localization",JSON.stringify(project.localization));
         return await this._request<ProjectModelInterface>(END_POINT + 'register/project', body)
@@ -49,9 +49,10 @@ export default class APiHelper {
 
     async _request<T>(url:string,body?:URLSearchParams|null,deepFilter = false):Promise<{ data?: Array<T>; error: boolean,message?:string }>{
         try {
+           
             const config = {
                 method: 'POST',
-                headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                headers: { 'content-type': 'application/x-www-form-urlencoded','Access-Control-Allow-Origin': true, },
                 data: body,
                 url,
             };
@@ -64,6 +65,7 @@ export default class APiHelper {
 
 
         } catch (e) {
+            // console.dir(e)
             return {
                 error:true,
                 message:e

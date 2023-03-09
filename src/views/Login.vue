@@ -27,6 +27,7 @@
             </v-stepper-content>
             <v-stepper-content step="2">
               <v-flex class="ma-2 align-grid">
+                <TextView text="Ola"/>
                 <vs-avatar :loading="isRegisteringUser" size="70" badge badge-color="success" class="my-2">
                   <img :src="user.photoURL" alt="">
                 </vs-avatar>
@@ -48,12 +49,9 @@
                   <TextView text="done"/>
                 </vs-button>
               </v-flex>
-
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
-
-
       </v-flex>
     </v-flex>
 
@@ -68,7 +66,6 @@ import {AppTheme, ColorType} from "@/values/Colors";
 import {LanguageType} from "@/values/Strings";
 import TextView from "@/utils/UI/TextView/TextView.vue";
 import BIcon from "@/utils/UI/BIcon/BIcon.vue";
-import {getAuth, signInWithPopup, GithubAuthProvider} from "firebase/auth";
 import firebase from "firebase/compat";
 import {assets} from "@/assets/Assets";
 import LinearLayout from "@/utils/UI/LinearLayout/LinearLayout.vue";
@@ -144,6 +141,8 @@ export default class Login extends Vue {
       });
 
     }catch (e) {
+      this.loginOptions[1].isLoading = false
+      this.loginOptions[0].disabled = false
     //
     }finally {
       setTimeout(()=>{
@@ -156,7 +155,6 @@ export default class Login extends Vue {
     this.loginOptions[0].isLoading = true
     this.loginOptions[1].disabled = true
     const provider = new firebase.auth.GithubAuthProvider();
-
     provider.addScope('repo');
 
     firebase
@@ -167,22 +165,19 @@ export default class Login extends Vue {
           /** @type {firebase.auth.OAuthCredential} */
           // const credential = result.credential;
           if(result.additionalUserInfo?.isNewUser) {
-
           //  TODO: register user
-
           }else{
           //  TODO: Get users info
           }
-
           // This gives you a GitHub Access Token. You can use it to access the GitHub API.
           // var token = credential.accessToken;
-
           // The signed-in user info.
-
 
           // ...
         }).catch((error) => {
       //    TODO Notify user that something happend
+      this.loginOptions[0].isLoading = false
+      this.loginOptions[1].disabled = false
       // Handle Errors here.
       // var errorCode = error.code;
       // var errorMessage = error.message;
@@ -197,16 +192,13 @@ export default class Login extends Vue {
   }
 
   registerUserToFauna():void{
-
     try {
-      console.log("hmmm")
-
       if(this.user.displayName){
         if (this.user.displayName.length < 2) {
           alert("Your name is too short")
           return
         }
-        console.log("opa")
+
         this.isRegisteringUser = true
 
         const api = new APiHelper();
@@ -235,7 +227,6 @@ export default class Login extends Vue {
   @Watch('isNewUser',{ immediate: true, deep: true })
   onNewUserChecked(isNew: boolean):void {
     if(isNew){
-
       const  fbUser = firebase.auth().currentUser;
      if(fbUser){
        this.user = {
