@@ -114,10 +114,8 @@ export default class ProjectRegister extends Vue {
       
       const api  = new APiHelper()
      const result =  await api.registerProject(this.projectInfo);
-      if(result.error){
-        if(result.reason?.includes("not unique")){
-          alert("You already have a project with this title")
-        }
+
+      if(!result){
         return
       }
       this.projectInfo.ref = (result as unknown as ProjectModelInterface).ref;

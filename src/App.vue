@@ -1,5 +1,5 @@
 <template>
-  <v-app :style="{background: colors.background} "  :dark="isDark" >
+  <v-app :style="{background: colors.background} " :dark="isDark">
 
     <div v-if="isSessionActive">
       <ToolBar/>
@@ -25,7 +25,6 @@ import firebase from "firebase/compat";
 
 import {UserModelInterface} from "@/models/User";
 import APiHelper from "@/api/APiHelper";
-import {errors} from "faunadb";
 import SIcon from "@/utils/UI/Sicon/SIcon.vue";
 import ToolBar from "@/components/ToolBar.vue";
 
@@ -39,107 +38,107 @@ import ToolBar from "@/components/ToolBar.vue";
   },
 })
 export default class App extends Vue {
-  
-  get colors ():ColorType {
+
+  get colors(): ColorType {
     return this.$store.getters.colors
   }
+
   get isDark(): boolean {
     return this.$store.getters.isDark;
   }
-  
+
   get isSessionActive(): boolean {
     return this.$store.getters.session
   }
-  get user():UserModelInterface {
-    return  this.$store.getters.user
+
+  get user(): UserModelInterface {
+    return this.$store.getters.user
   }
-  get newUSer():boolean {
+
+  get newUSer(): boolean {
     return this.$store.getters.isNewUser
   }
 
-  @Watch('isDark',{immediate:true,deep:true})
-  onThemeChanged(isDark: boolean):void {
+  @Watch('isDark', {immediate: true, deep: true})
+  onThemeChanged(isDark: boolean): void {
     // console.log("Dark is ", isDark)
   }
-  async getUserInfoFromDB(uid:string,onSuccess:(user:UserModelInterface | null)=>void, onError:(error: any)=> void):Promise<void>{
+
+  async getUserInfoFromDB(uid: string, onSuccess: (user: UserModelInterface | null) => void, onError: (error: any) => void): Promise<void> {
     const api = new APiHelper();
     const result = await api.getUserByUId(uid);
-    if(result.error){
-        if(result['reason']?.includes("not found")){
-          onSuccess(null)
-        }else{
-          onError(result)
-        }
-        return
+    if (!result) {
+      onError("Failed")
+      return
     }
-    onSuccess(result.data as unknown as UserModelInterface)
+    onSuccess(result)
     // onSuccess(result);
   }
 
 
-  created():void {
+  created(): void {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     Vue.prototype.$vs = this.$vs;
   }
 
-  beforeMount():void{
+  beforeMount(): void {
     // firebase.auth().signOut();
-    firebase.auth().onAuthStateChanged((user)=>{
+    firebase.auth().onAuthStateChanged((user) => {
 
-      if(!user){
+      if (!user) {
 
-        this.$store.dispatch("updateSession",{user:null})
-        this.$store.dispatch("updateNewUserState",false)
+        this.$store.dispatch("updateSession", {user: null})
+        this.$store.dispatch("updateNewUserState", false)
         // console.log("User out")
-      //  TODO: don't let user be in some other page beside Login
-        if(this.$route.name !== "Login"){
+        //  TODO: don't let user be in some other page beside Login
+        if (this.$route.name !== "Login") {
           this.$router.replace("/")
         }
-        this.$store.dispatch("updateProjectList",[])
+        this.$store.dispatch("updateProjectList", [])
 
         return
       }
-      this.getUserInfoFromDB(user.uid,(user)=>{
+      this.getUserInfoFromDB(user.uid, (user) => {
 
-       if(!user){
-         this.$store.dispatch("updateSession",{user:null})
-         this.$store.dispatch("updateNewUserState",false)
-         if(this.$route.name !== "Login"){
-           this.$router.replace("/")
-         }
-         return
-       }
-        this.$store.dispatch("updateNewUserState",false)
+        if (!user) {
+          this.$store.dispatch("updateSession", {user: null})
+          this.$store.dispatch("updateNewUserState", false)
+          if (this.$route.name !== "Login") {
+            this.$router.replace("/")
+          }
+          return
+        }
+        this.$store.dispatch("updateNewUserState", false)
 
-        if(this.$route.name == "Login")
-            this.$router.replace("/home").then(()=>{this.$store.dispatch("updateSession",{user:user})})
+        if (this.$route.name == "Login")
+          this.$router.replace("/home").then(() => {
+            this.$store.dispatch("updateSession", {user: user})
+          })
         else
-          this.$store.dispatch("updateSession",{user:user});
+          this.$store.dispatch("updateSession", {user: user});
 
 
-      }, (error)=>{
+      }, (error) => {
         console.log(`Something went wrong try again `, error)
-        this.$store.dispatch("updateNewUserState",true)
+        this.$store.dispatch("updateNewUserState", true)
         // firebase.auth().signOut()
       })
     })
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
     Utils.onThemeChange(systemTheme)
-    systemTheme.addEventListener("change",(theme)=>Utils.onThemeChange(theme))
+    systemTheme.addEventListener("change", (theme) => Utils.onThemeChange(theme))
   }
-
 
 
 }
 
 
-
 </script>
 <style>
-  html, body{
+html, body {
   height: 100%;
-  background-color:#1C2831 !important;
-  }
+  background-color: #1C2831 !important;
+}
 </style>

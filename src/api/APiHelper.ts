@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import {UserModelInterface} from "@/models/User";
-import {ProjectModelInterface} from "@/models/Project";
+import {ProjectLocal, ProjectModelInterface} from "@/models/Project";
 import FaunaDbHelper, {DB_COLLECTION, DB_INDEX, FaunaData} from "@/faundaHelper/FaunaDbHelper";
 import Utils from "@/faundaHelper/Utils";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -42,11 +42,12 @@ export default class APiHelper {
 
     }
 
-    async getUserByUId(uid: string): Promise<UserModelInterface> {
+    async getUserByUId(uid: string): Promise<UserModelInterface | null> {
         // return await this._request<UserModelInterface>(END_POINT + `user/${uid}`)
         return FaunaDbHelper.instance.GetByIndex(DB_INDEX.USER_BY_UID, uid)
             .catch(reason => {
-                return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
+
+                return null
             }).then(result => {
                 return (result as FaunaData).data as unknown as UserModelInterface
             })
@@ -54,23 +55,35 @@ export default class APiHelper {
 
     async getProjects(uid: string): Promise<Array<ProjectModelInterface>> {
         // return await this._request<ProjectModelInterface>(END_POINT + `user/${uid}/projects`)
-        return FaunaDbHelper.instance.LoadByIndexBy(DB_INDEX.PROJECT_OWNER_UID, uid)
+        return FaunaDbHelper.instance.LoadByIndexBy<{ data:Array<ProjectModelInterface> }>(DB_INDEX.PROJECT_OWNER_UID, uid)
             .catch(reason => {
+                console.log(reason)
                 return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
             }).then(result => {
-                return (result as FaunaData).data as unknown as Array<ProjectModelInterface>
+                if("error" in result )
+                    return []
+                return result.data
             })
     }
 
-    async updateProject(project: ProjectModelInterface): Promise<{ data?: Array<ProjectModelInterface>; error: boolean; message?: string, reason?: string }> {
-        const body = new URLSearchParams({
-            owner: project.owner as string,
-            ref: project.ref as string,
-            updatedFilled: "localization",
-            newValue: JSON.stringify(project.localization) // TODO remove this so that this function can be used to update anything related to the project
-        })
-        return await this._request<ProjectModelInterface>(END_POINT + "update/project/specific", body)
+    async updateProject(project: ProjectModelInterface): Promise<ProjectLocal | null> {
+        // const body = new URLSearchParams({
+        //     owner: project.owner as string,
+        //     ref: project.ref as string,
+        //     updatedFilled: "localization",
+        //     newValue: JSON.stringify(project.localization) // TODO remove this so that this function can be used to update anything related to the project
+        // })
+        // return await this._request<ProjectModelInterface>(END_POINT + "update/project/specific", body)
 
+
+        return FaunaDbHelper.instance.Update<{data: ProjectLocal }>(DB_COLLECTION.PROJECT,project.ref as string,project,"localization")
+            .catch(reason => {
+                return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
+            }).then(result => {
+                if("error" in result )
+                    return null
+                return result.data
+            })
     }
 
     async _request<T>(url: string, body?: URLSearchParams | null, deepFilter = false): Promise<{ data?: Array<T>; error: boolean, message?: string }> {

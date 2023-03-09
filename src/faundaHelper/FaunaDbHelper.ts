@@ -20,7 +20,7 @@ export enum DB_COLLECTION {
 export default class FaunaDbHelper {
     private static _instance: FaunaDbHelper
     private FQL = query
-    private FAUNA_SECRET = "fnAE-kLvr6AAzcqZvA5HGghrlcSzrNYg-73a3bAS"//process.env["VUE_APP_FAUNA_SECRET"]
+    private FAUNA_SECRET = process.env["VUE_APP_FAUNA_SECRET"]
 
     private constructor() {
         //      CANT BE CALLED OUTSIDE
@@ -37,8 +37,9 @@ export default class FaunaDbHelper {
         return new Client({secret: this.FAUNA_SECRET as string, domain: 'db.eu.fauna.com'});
     }
 
-    async CreateWithCustomRef<T>(Collection: DB_COLLECTION, data: T, ref: string, client?: Client): Promise<Expr | FaunaData> {
+    async CreateWithCustomRef<T extends {ref:string | null}>(Collection: DB_COLLECTION, data: T, ref: string, client?: Client): Promise<Expr | FaunaData> {
         try {
+            data.ref = ref
             client = client ?? this.connect();
             const FQL = this.FQL;
             return await client.query(
@@ -73,7 +74,7 @@ export default class FaunaDbHelper {
             const FQL = this.FQL;
             return await client.query(FQL.Get(Match(Index(index), ref)));
         } catch (e) {
-            console.log(e)
+
             throw Error(e.description);
         }
     }
@@ -98,7 +99,7 @@ export default class FaunaDbHelper {
 
             const client = this.connect();
             const FQL = this.FQL;
-            return await client.query(FQL.Map(
+            return client.query(FQL.Map(
                 FQL.Paginate(Match(Index(index), reference), option),
                 Lambda((ref: string | number | boolean) => Select(['data'], FQL.Get(ref)))));
         } catch (e) {

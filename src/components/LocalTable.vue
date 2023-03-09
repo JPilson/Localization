@@ -90,12 +90,12 @@
         </v-btn>
       </div>
     </v-flex>
-    <v-simple-table dense style="background: transparent" class="localTable">
+    <v-simple-table dense style="background: transparent; margin: 0;padding: 0" class="localTable">
       <template v-slot:default>
         <thead>
-        <tr style="max-width: 50px !important;">
+        <tr>
           <th v-for="(item, index) in items" :key="`st_${index}`">
-            <LinearLayout :background-tint="item.isKey? colors.keyColumn : colors.card" rounded-corners="15"
+            <LinearLayout :background-tint="item.isKey? colors.keyColumn : colors.card" rounded-corners="5"
                           class="mx-2">
               <v-flex d-flex flex-column class="my-2">
                 <v-flex d-flex justify-space-between>
@@ -128,7 +128,6 @@
         <tbody>
         <tr>
           <td v-for="(item, indexP) in items" :key="`st_data_${indexP}`">
-
             <v-list dense :style="{background:colors.background}"
                     style="border-right: 1px solid rgba(255,255,255,0.05)">
 
@@ -475,23 +474,19 @@ export default class LocalTable extends Vue {
 <style lang="scss">
 .localTable {
   td {
-    padding-right: 0 !important;
-    padding-left: 0 !important;
+    padding: 0!important;
     min-width: 200px !important;
 
 
   }
 
   th {
-    padding-right: 0 !important;
-    padding-left: 0 !important;
-
-
+    padding: 0!important
   }
 
   td {
     min-width: 200px !important;
-
+    background-color: #309696;
   }
 
   .classKey {

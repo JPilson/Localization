@@ -46,12 +46,7 @@ export default class Home extends Vue {
       const api = new APiHelper()
 
       const result = await api.getProjects(uid);
-      // console.log(result)
-      if (result.error) {
-        return
-      }
-
-      await this.$store.dispatch("updateProjectList", result.data)
+      await this.$store.dispatch("updateProjectList", result)
     }  finally {
       this.isGettingProjects = false
     }
