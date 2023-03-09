@@ -1,74 +1,100 @@
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import {UserModelInterface} from "@/models/User";
 import {ProjectModelInterface} from "@/models/Project";
+import FaunaDbHelper, {DB_COLLECTION, DB_INDEX, FaunaData} from "@/faundaHelper/FaunaDbHelper";
+import Utils from "@/faundaHelper/Utils";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const axios = require('axios').default;
 
 const END_POINT = process.env["VUE_APP_END_POINT"]
-enum endpoint {
-
-}
-
 export default class APiHelper {
-
     constructor() {
-    //    EMPTY
-    }
-    async registerUser (userInfo:UserModelInterface): Promise<{ data?: Array<UserModelInterface>; error: boolean; message?: string }> {
+        //    EMPTY
 
-        const body = new URLSearchParams(userInfo as Record<string, any>)
-
-        return await this._request<UserModelInterface>(END_POINT + 'register/user', body)
-    }
-    async  registerProject(project:ProjectModelInterface): Promise<{ data?: Array<ProjectModelInterface>; error: boolean; message?: string,reason?: string }> {
-        const body = new URLSearchParams(project as unknown as Record<string, never>)
-        body.set("contributors",JSON.stringify(project.contributors));
-        body.set("localization",JSON.stringify(project.localization));
-        return await this._request<ProjectModelInterface>(END_POINT + 'register/project', body)
-    }
-    async getUserByUId (uid:string):Promise<{ data?: Array<UserModelInterface>; error: boolean; message?: string,reason?:string }> {
-        return await this._request<UserModelInterface>(END_POINT + `user/${uid}`)
-    }
-    async getProjects (uid:string):Promise<{ data?: Array<ProjectModelInterface>; error: boolean; message?: string,reason?:string }> {
-        return await this._request<ProjectModelInterface>(END_POINT + `user/${uid}/projects`)
     }
 
-    async updateProject(project:ProjectModelInterface): Promise<{ data?: Array<ProjectModelInterface>; error: boolean; message?: string,reason?: string }>{
-        const body =  new URLSearchParams({
-            owner : project.owner as string,
+    async registerUser(userInfo: UserModelInterface): Promise<UserModelInterface> {
+        //
+        // const body = new URLSearchParams(userInfo as unknown as Record<string, never>)
+        // return await this._request<UserModelInterface>(END_POINT + 'register/user', body)
+        return FaunaDbHelper.instance.Create(DB_COLLECTION.USERS, userInfo)
+            .catch(reason => {
+                return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
+            }).then(result => {
+                return (result as FaunaData).data as unknown as UserModelInterface
+            })
+    }
+
+    async registerProject(project: ProjectModelInterface): Promise<{ data?: Array<ProjectModelInterface> }> {
+        // const body = new URLSearchParams(project as unknown as Record<string, never>)
+        // body.set("contributors", JSON.stringify(project.contributors));
+        // body.set("localization", JSON.stringify(project.localization));
+        // return await this._request<ProjectModelInterface>(END_POINT + 'register/project', body)
+
+        return FaunaDbHelper.instance.CreateWithCustomRef(DB_COLLECTION.PROJECT, project, Utils.generateRef())
+            .catch(reason => {
+                return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
+            }).then(result => {
+                return (result as FaunaData).data
+            })
+
+    }
+
+    async getUserByUId(uid: string): Promise<Array<UserModelInterface>> {
+        // return await this._request<UserModelInterface>(END_POINT + `user/${uid}`)
+        return FaunaDbHelper.instance.GetByIndex(DB_INDEX.USER_BY_UID, uid)
+            .catch(reason => {
+                return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
+            }).then(result => {
+                return (result as FaunaData).data as unknown as Array<UserModelInterface>
+            })
+    }
+
+    async getProjects(uid: string): Promise<Array<ProjectModelInterface>> {
+        // return await this._request<ProjectModelInterface>(END_POINT + `user/${uid}/projects`)
+        return FaunaDbHelper.instance.LoadByIndexBy(DB_INDEX.PROJECT_OWNER_UID, uid)
+            .catch(reason => {
+                return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
+            }).then(result => {
+                return (result as FaunaData).data as unknown as Array<ProjectModelInterface>
+            })
+    }
+
+    async updateProject(project: ProjectModelInterface): Promise<{ data?: Array<ProjectModelInterface>; error: boolean; message?: string, reason?: string }> {
+        const body = new URLSearchParams({
+            owner: project.owner as string,
             ref: project.ref as string,
-            updatedFilled:"localization",
+            updatedFilled: "localization",
             newValue: JSON.stringify(project.localization) // TODO remove this so that this function can be used to update anything related to the project
         })
-        return await this._request<ProjectModelInterface>(END_POINT + "update/project/specific",body)
+        return await this._request<ProjectModelInterface>(END_POINT + "update/project/specific", body)
 
     }
 
-    async _request<T>(url:string,body?:URLSearchParams|null,deepFilter = false):Promise<{ data?: Array<T>; error: boolean,message?:string }>{
+    async _request<T>(url: string, body?: URLSearchParams | null, deepFilter = false): Promise<{ data?: Array<T>; error: boolean, message?: string }> {
         try {
-           
+
             const config = {
                 method: 'POST',
-                headers: { 'content-type': 'application/x-www-form-urlencoded','Access-Control-Allow-Origin': true, },
+                headers: {'content-type': 'application/x-www-form-urlencoded', 'Access-Control-Allow-Origin': true,},
                 data: body,
                 url,
             };
             const result = await axios(config)
 
-            if(result.data.error ){
+            if (result.data.error) {
                 return result.data
             }
-            return  deepFilter ? result.data : result.data
+            return deepFilter ? result.data : result.data
 
 
         } catch (e) {
             // console.dir(e)
             return {
-                error:true,
-                message:e
+                error: true,
+                message: e
             }
         }
     }
