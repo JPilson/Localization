@@ -42,13 +42,13 @@ export default class APiHelper {
 
     }
 
-    async getUserByUId(uid: string): Promise<Array<UserModelInterface>> {
+    async getUserByUId(uid: string): Promise<UserModelInterface> {
         // return await this._request<UserModelInterface>(END_POINT + `user/${uid}`)
         return FaunaDbHelper.instance.GetByIndex(DB_INDEX.USER_BY_UID, uid)
             .catch(reason => {
                 return {error: true, message: "Make sure your providing all the information and", reason: `${reason}`}
             }).then(result => {
-                return (result as FaunaData).data as unknown as Array<UserModelInterface>
+                return (result as FaunaData).data as unknown as UserModelInterface
             })
     }
 

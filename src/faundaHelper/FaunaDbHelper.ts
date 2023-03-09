@@ -20,7 +20,7 @@ export enum DB_COLLECTION {
 export default class FaunaDbHelper {
     private static _instance: FaunaDbHelper
     private FQL = query
-    private FAUNA_SECRET = process.env["VUE_APP_FAUNA_SECRET"]
+    private FAUNA_SECRET = "fnAE-kLvr6AAzcqZvA5HGghrlcSzrNYg-73a3bAS"//process.env["VUE_APP_FAUNA_SECRET"]
 
     private constructor() {
         //      CANT BE CALLED OUTSIDE
